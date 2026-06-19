@@ -11,10 +11,14 @@ import { registerSchema, type RegisterInput } from "@/schemas/auth";
 type FieldErrors = Partial<Record<keyof RegisterInput, string>>;
 
 export function RegisterForm() {
-  const [values,    setValues]   = useState<RegisterInput>({ name: "", email: "", password: "" });
-  const [errors,    setErrors]   = useState<FieldErrors>({});
-  const [loading,   setLoading]  = useState(false);
-  const [showPass,  setShowPass] = useState(false);
+  const [values, setValues] = useState<RegisterInput>({
+    name: "",
+    email: "",
+    password: "",
+  });
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const [loading, setLoading] = useState(false);
+  const [showPass, setShowPass] = useState(false);
   const [authError, setAuthError] = useState("");
 
   function handleChange(field: keyof RegisterInput) {
@@ -33,7 +37,7 @@ export function RegisterForm() {
     const parsed = registerSchema.safeParse(values);
     if (!parsed.success) {
       const fieldErrors: FieldErrors = {};
-      parsed.error.errors.forEach((err) => {
+      parsed.error.issues.forEach((err) => {
         const key = err.path[0] as keyof RegisterInput;
         if (!fieldErrors[key]) fieldErrors[key] = err.message;
       });
@@ -44,10 +48,10 @@ export function RegisterForm() {
     setLoading(true);
 
     // Step 1: Create the account via API
-    const res  = await fetch("/api/auth/register", {
-      method:  "POST",
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
       headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify(parsed.data),
+      body: JSON.stringify(parsed.data),
     });
     const json = await res.json();
 
@@ -63,7 +67,7 @@ export function RegisterForm() {
 
     // Step 3: Auto sign-in
     const result = await signIn("credentials", {
-      email:    parsed.data.email,
+      email: parsed.data.email,
       password: parsed.data.password,
       redirect: false,
     });
@@ -138,7 +142,11 @@ export function RegisterForm() {
             className="absolute right-3 top-9 text-foreground-faint hover:text-foreground-muted transition-colors"
             aria-label={showPass ? "Hide password" : "Show password"}
           >
-            {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            {showPass ? (
+              <EyeOff className="h-4 w-4" />
+            ) : (
+              <Eye className="h-4 w-4" />
+            )}
           </button>
         </div>
 
@@ -156,7 +164,12 @@ export function RegisterForm() {
           </ul>
         )}
 
-        <Button type="submit" size="lg" className="w-full mt-2" loading={loading}>
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full mt-2"
+          loading={loading}
+        >
           Create account
         </Button>
       </form>

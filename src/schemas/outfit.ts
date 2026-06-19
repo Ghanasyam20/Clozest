@@ -17,7 +17,7 @@ export const generateOutfitSchema = z.object({
     .object({
       styleTypes:         z.array(z.string()),
       favoriteColors:     z.array(z.string()).optional(),
-      fashionPreferences: z.record(z.unknown()).optional(),
+      fashionPreferences: z.record(z.string(), z.unknown()).optional(),
     })
     .optional(),
 });

@@ -64,11 +64,12 @@ export const authOptions: NextAuthOptions = {
 
           console.log("[Auth] Login success:", email);
           return {
-            id:        user.id,
-            email:     user.email,
-            name:      user.name ?? undefined,
-            image:     user.avatarUrl ?? undefined,
-          };
+  id: user.id,
+  email: user.email,
+  name: user.name ?? undefined,
+  image: user.avatarUrl ?? undefined,
+  onboarded: user.onboarded,
+};
         } catch (error) {
           console.error("[Auth] authorize() error:", error);
           return null;

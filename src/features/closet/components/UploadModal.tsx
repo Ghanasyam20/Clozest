@@ -1,10 +1,16 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
-import { useDropzone } from "react-dropzone";
+import { useDropzone, type FileRejection } from "react-dropzone";
 import Image from "next/image";
 import {
-  Upload, X, Sparkles, Check, AlertCircle, ChevronDown, Wifi,
+  Upload,
+  X,
+  Sparkles,
+  Check,
+  AlertCircle,
+  ChevronDown,
+  Wifi,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -17,38 +23,54 @@ import { useClassify } from "../hooks/useClassify";
 import { toast } from "@/hooks/useToast";
 import type { ClassificationResult } from "@/types";
 
-const CATEGORIES    = ["tops", "bottoms", "dresses", "outerwear", "footwear", "accessories"] as const;
-const SEASONS       = ["spring", "summer", "autumn", "winter"] as const;
-const PATTERNS      = ["solid", "stripes", "plaid", "floral", "geometric", "animal", "abstract"] as const;
-const MAX_SIZE      = 10 * 1024 * 1024; // 10MB
+const CATEGORIES = [
+  "tops",
+  "bottoms",
+  "dresses",
+  "outerwear",
+  "footwear",
+  "accessories",
+] as const;
+const SEASONS = ["spring", "summer", "autumn", "winter"] as const;
+const PATTERNS = [
+  "solid",
+  "stripes",
+  "plaid",
+  "floral",
+  "geometric",
+  "animal",
+  "abstract",
+] as const;
+const MAX_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 
 type Step = "drop" | "preview" | "classify" | "details" | "saving" | "done";
 
 interface UploadModalProps {
-  open:     boolean;
-  onClose:  () => void;
-  onSaved:  () => void;
+  open: boolean;
+  onClose: () => void;
+  onSaved: () => void;
 }
 
 export function UploadModal({ open, onClose, onSaved }: UploadModalProps) {
-  const [step,        setStep]        = useState<Step>("drop");
-  const [file,        setFile]        = useState<File | null>(null);
-  const [preview,     setPreview]     = useState<string | null>(null);
+  const [step, setStep] = useState<Step>("drop");
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
-  const [itemId,      setItemId]      = useState<string | null>(null);
-  const [fileError,   setFileError]   = useState<string | null>(null);
+  const [itemId, setItemId] = useState<string | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
 
   // Form fields
-  const [name,     setName]     = useState("");
+  const [name, setName] = useState("");
   const [category, setCategory] = useState("");
-  const [color,    setColor]    = useState("");
-  const [fabric,   setFabric]   = useState("");
-  const [pattern,  setPattern]  = useState("");
-  const [seasons,  setSeasons]  = useState<string[]>([]);
-  const [style,    setStyle]    = useState("");
+  const [color, setColor] = useState("");
+  const [fabric, setFabric] = useState("");
+  const [pattern, setPattern] = useState("");
+  const [seasons, setSeasons] = useState<string[]>([]);
+  const [style, setStyle] = useState("");
 
-  const { classify, classification, classifying, classifyError } = useClassify();
+  const { classify, classification, classifying, classifyError } =
+    useClassify();
   const abortRef = useRef<AbortController | null>(null);
 
   // ── Reset state ──────────────────────────────────────────────────────────────
@@ -60,8 +82,13 @@ export function UploadModal({ open, onClose, onSaved }: UploadModalProps) {
     setUploadedUrl(null);
     setItemId(null);
     setFileError(null);
-    setName(""); setCategory(""); setColor("");
-    setFabric(""); setPattern(""); setSeasons([]); setStyle("");
+    setName("");
+    setCategory("");
+    setColor("");
+    setFabric("");
+    setPattern("");
+    setSeasons([]);
+    setStyle("");
   }
 
   function handleClose() {
@@ -70,12 +97,14 @@ export function UploadModal({ open, onClose, onSaved }: UploadModalProps) {
   }
 
   // ── Dropzone ─────────────────────────────────────────────────────────────────
-  const onDrop = useCallback((accepted: File[], rejected: { file: File; errors: { message: string }[] }[]) => {
+  const onDrop = useCallback((accepted: File[], rejected: FileRejection[]) => {
     setFileError(null);
     if (rejected.length > 0) {
       const err = rejected[0].errors[0];
       setFileError(
-        err.message.includes("size") ? `File too large (max ${formatBytes(MAX_SIZE)})` : "Invalid file type. Please use JPG, PNG, or WebP."
+        err.message.includes("size")
+          ? `File too large (max ${formatBytes(MAX_SIZE)})`
+          : "Invalid file type. Please use JPG, PNG, or WebP.",
       );
       return;
     }
@@ -88,8 +117,13 @@ export function UploadModal({ open, onClose, onSaved }: UploadModalProps) {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept:   { "image/jpeg": [], "image/png": [], "image/webp": [], "image/avif": [] },
-    maxSize:  MAX_SIZE,
+    accept: {
+      "image/jpeg": [],
+      "image/png": [],
+      "image/webp": [],
+      "image/avif": [],
+    },
+    maxSize: MAX_SIZE,
     maxFiles: 1,
     multiple: false,
   });
@@ -105,7 +139,11 @@ export function UploadModal({ open, onClose, onSaved }: UploadModalProps) {
 
     const uploadResult = await uploadWardrobeItem(formData);
     if (uploadResult.error || !uploadResult.data) {
-      toast({ variant: "destructive", title: "Upload failed", description: uploadResult.error ?? "Unknown error" });
+      toast({
+        variant: "destructive",
+        title: "Upload failed",
+        description: uploadResult.error ?? "Unknown error",
+      });
       setStep("preview");
       return;
     }
@@ -114,7 +152,10 @@ export function UploadModal({ open, onClose, onSaved }: UploadModalProps) {
     setItemId(uploadResult.data.id);
 
     // Step 2: AI classify — pass itemId so results are persisted to DB
-    const result: ClassificationResult | null = await classify(uploadResult.data.imageUrl, uploadResult.data.id);
+    const result: ClassificationResult | null = await classify(
+      uploadResult.data.imageUrl,
+      uploadResult.data.id,
+    );
     if (result) {
       applyClassification(result);
     }
@@ -124,11 +165,11 @@ export function UploadModal({ open, onClose, onSaved }: UploadModalProps) {
 
   function applyClassification(r: ClassificationResult) {
     if (r.category) setCategory(r.category);
-    if (r.color)    setColor(r.color);
-    if (r.fabric)   setFabric(r.fabric);
-    if (r.pattern)  setPattern(r.pattern);
-    if (r.season)   setSeasons(r.season);
-    if (r.style)    setStyle(r.style);
+    if (r.color) setColor(r.color);
+    if (r.fabric) setFabric(r.fabric);
+    if (r.pattern) setPattern(r.pattern);
+    if (r.season) setSeasons(r.season);
+    if (r.style) setStyle(r.style);
   }
 
   // ── Save item details ─────────────────────────────────────────────────────────
@@ -137,28 +178,35 @@ export function UploadModal({ open, onClose, onSaved }: UploadModalProps) {
     setStep("saving");
 
     const res = await fetch(`/api/wardrobe/${itemId}`, {
-      method:  "PATCH",
+      method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({
-        name:    name || undefined,
+      body: JSON.stringify({
+        name: name || undefined,
         category: category || undefined,
-        color:   color   || undefined,
-        fabric:  fabric  || undefined,
+        color: color || undefined,
+        fabric: fabric || undefined,
         pattern: pattern || undefined,
-        season:  seasons.length > 0 ? seasons : undefined,
-        style:   style   || undefined,
+        season: seasons.length > 0 ? seasons : undefined,
+        style: style || undefined,
       }),
     });
     const json = await res.json();
 
     if (json.error) {
-      toast({ variant: "destructive", title: "Could not save details", description: json.error });
+      toast({
+        variant: "destructive",
+        title: "Could not save details",
+        description: json.error,
+      });
       setStep("details");
       return;
     }
 
     setStep("done");
-    toast({ title: "Item added ✨", description: "Your wardrobe has been updated." });
+    toast({
+      title: "Item added ✨",
+      description: "Your wardrobe has been updated.",
+    });
     setTimeout(() => {
       reset();
       onClose();
@@ -186,8 +234,8 @@ export function UploadModal({ open, onClose, onSaved }: UploadModalProps) {
           <motion.div
             key="modal"
             initial={{ opacity: 0, scale: 0.96, y: 20 }}
-            animate={{ opacity: 1, scale: 1,    y: 0 }}
-            exit={{ opacity: 0, scale: 0.96,    y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 20 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
           >
@@ -207,7 +255,9 @@ export function UploadModal({ open, onClose, onSaved }: UploadModalProps) {
               {step === "drop" && (
                 <div className="p-8">
                   <div className="mb-6">
-                    <h2 className="font-display text-2xl text-foreground">Add to wardrobe</h2>
+                    <h2 className="font-display text-2xl text-foreground">
+                      Add to wardrobe
+                    </h2>
                     <p className="text-sm text-foreground-muted mt-1">
                       Upload a photo and our AI will classify it automatically.
                     </p>
@@ -219,24 +269,32 @@ export function UploadModal({ open, onClose, onSaved }: UploadModalProps) {
                       "relative rounded-2xl border-2 border-dashed p-10 text-center cursor-pointer transition-all duration-300",
                       isDragActive
                         ? "border-accent bg-accent/5 scale-[1.02]"
-                        : "border-border hover:border-accent/50 hover:bg-surface-2/50"
+                        : "border-border hover:border-accent/50 hover:bg-surface-2/50",
                     )}
                   >
                     <input {...getInputProps()} />
 
-                    <div className={cn(
-                      "flex flex-col items-center gap-4 transition-transform duration-300",
-                      isDragActive && "scale-105"
-                    )}>
-                      <div className={cn(
-                        "w-16 h-16 rounded-2xl flex items-center justify-center transition-colors",
-                        isDragActive ? "bg-accent/20 text-accent" : "bg-surface-2 text-foreground-faint"
-                      )}>
+                    <div
+                      className={cn(
+                        "flex flex-col items-center gap-4 transition-transform duration-300",
+                        isDragActive && "scale-105",
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "w-16 h-16 rounded-2xl flex items-center justify-center transition-colors",
+                          isDragActive
+                            ? "bg-accent/20 text-accent"
+                            : "bg-surface-2 text-foreground-faint",
+                        )}
+                      >
                         <Upload className="h-7 w-7" />
                       </div>
                       <div>
                         <p className="text-foreground font-medium">
-                          {isDragActive ? "Drop it here" : "Drop your photo here"}
+                          {isDragActive
+                            ? "Drop it here"
+                            : "Drop your photo here"}
                         </p>
                         <p className="text-sm text-foreground-muted mt-1">
                           or <span className="text-accent">browse files</span>
@@ -256,7 +314,8 @@ export function UploadModal({ open, onClose, onSaved }: UploadModalProps) {
                   )}
 
                   <p className="mt-6 text-xs text-foreground-faint text-center">
-                    For best results, photograph items flat on a neutral background.
+                    For best results, photograph items flat on a neutral
+                    background.
                   </p>
                 </div>
               )}
@@ -265,7 +324,9 @@ export function UploadModal({ open, onClose, onSaved }: UploadModalProps) {
               {step === "preview" && preview && (
                 <div className="p-8">
                   <div className="mb-6">
-                    <h2 className="font-display text-2xl text-foreground">Looks good?</h2>
+                    <h2 className="font-display text-2xl text-foreground">
+                      Looks good?
+                    </h2>
                     <p className="text-sm text-foreground-muted mt-1">
                       {file?.name} — {formatBytes(file?.size ?? 0)}
                     </p>
@@ -281,10 +342,17 @@ export function UploadModal({ open, onClose, onSaved }: UploadModalProps) {
                   </div>
 
                   <div className="flex gap-3">
-                    <Button variant="outline" className="flex-1" onClick={reset}>
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={reset}
+                    >
                       Choose different
                     </Button>
-                    <Button className="flex-1 gap-2" onClick={handleUploadAndClassify}>
+                    <Button
+                      className="flex-1 gap-2"
+                      onClick={handleUploadAndClassify}
+                    >
                       <Sparkles className="h-4 w-4" />
                       Upload & Classify
                     </Button>
@@ -318,25 +386,39 @@ export function UploadModal({ open, onClose, onSaved }: UploadModalProps) {
                     {/* Steps list */}
                     <div className="w-full space-y-3 text-sm">
                       {[
-                        { label: "Uploading image",       done: !!uploadedUrl },
-                        { label: "AI classification",      done: false, active: classifying },
-                        { label: "Saving to wardrobe",    done: false },
+                        { label: "Uploading image", done: !!uploadedUrl },
+                        {
+                          label: "AI classification",
+                          done: false,
+                          active: classifying,
+                        },
+                        { label: "Saving to wardrobe", done: false },
                       ].map((s, i) => (
                         <div key={i} className="flex items-center gap-3">
-                          <div className={cn(
-                            "w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0 transition-all",
-                            s.done   ? "bg-accent border-accent"          :
-                            s.active ? "border-accent animate-pulse-accent" :
-                                       "border-border"
-                          )}>
-                            {s.done && <Check className="h-3 w-3 text-accent-foreground" />}
+                          <div
+                            className={cn(
+                              "w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0 transition-all",
+                              s.done
+                                ? "bg-accent border-accent"
+                                : s.active
+                                  ? "border-accent animate-pulse-accent"
+                                  : "border-border",
+                            )}
+                          >
+                            {s.done && (
+                              <Check className="h-3 w-3 text-accent-foreground" />
+                            )}
                           </div>
-                          <span className={cn(
-                            "transition-colors",
-                            s.done   ? "text-foreground" :
-                            s.active ? "text-accent"     :
-                                       "text-foreground-faint"
-                          )}>
+                          <span
+                            className={cn(
+                              "transition-colors",
+                              s.done
+                                ? "text-foreground"
+                                : s.active
+                                  ? "text-accent"
+                                  : "text-foreground-faint",
+                            )}
+                          >
                             {s.label}
                           </span>
                         </div>
@@ -351,7 +433,9 @@ export function UploadModal({ open, onClose, onSaved }: UploadModalProps) {
                 <div className="p-8 max-h-[85vh] overflow-y-auto">
                   <div className="mb-5">
                     <div className="flex items-center gap-2 mb-1">
-                      <h2 className="font-display text-2xl text-foreground">Item details</h2>
+                      <h2 className="font-display text-2xl text-foreground">
+                        Item details
+                      </h2>
                       {!classifyError && (
                         <span className="flex items-center gap-1 text-xs text-accent px-2 py-0.5 rounded-full bg-accent/10 border border-accent/20">
                           <Sparkles className="h-3 w-3" />
@@ -369,7 +453,11 @@ export function UploadModal({ open, onClose, onSaved }: UploadModalProps) {
                   {/* Confidence meter — only shown when AI succeeded */}
                   {!classifyError && classification && (
                     <div className="mb-5">
-                      <ConfidenceMeter classification={classification as import("../hooks/useClassify").EnrichedClassification} />
+                      <ConfidenceMeter
+                        classification={
+                          classification as import("../hooks/useClassify").EnrichedClassification
+                        }
+                      />
                     </div>
                   )}
 
@@ -377,7 +465,12 @@ export function UploadModal({ open, onClose, onSaved }: UploadModalProps) {
                   {preview && (
                     <div className="flex gap-4 mb-6 p-3 rounded-xl bg-surface-2 border border-border">
                       <div className="relative w-16 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-surface">
-                        <Image src={preview} alt="Item" fill className="object-cover" />
+                        <Image
+                          src={preview}
+                          alt="Item"
+                          fill
+                          className="object-cover"
+                        />
                       </div>
                       <div className="flex-1 min-w-0">
                         <Input
@@ -406,7 +499,7 @@ export function UploadModal({ open, onClose, onSaved }: UploadModalProps) {
                               "px-3 py-1.5 rounded-lg text-sm border transition-all capitalize",
                               category === c
                                 ? "bg-accent/10 border-accent/50 text-accent"
-                                : "border-border text-foreground-muted hover:border-border/80"
+                                : "border-border text-foreground-muted hover:border-border/80",
                             )}
                           >
                             {c}
@@ -435,7 +528,13 @@ export function UploadModal({ open, onClose, onSaved }: UploadModalProps) {
                         >
                           <option value="">Select…</option>
                           {PATTERNS.map((p) => (
-                            <option key={p} value={p} className="bg-surface capitalize">{p}</option>
+                            <option
+                              key={p}
+                              value={p}
+                              className="bg-surface capitalize"
+                            >
+                              {p}
+                            </option>
                           ))}
                         </select>
                       </div>
@@ -459,18 +558,24 @@ export function UploadModal({ open, onClose, onSaved }: UploadModalProps) {
                         {SEASONS.map((s) => (
                           <button
                             key={s}
-                            onClick={() => setSeasons((prev) =>
-                              prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]
-                            )}
+                            onClick={() =>
+                              setSeasons((prev) =>
+                                prev.includes(s)
+                                  ? prev.filter((x) => x !== s)
+                                  : [...prev, s],
+                              )
+                            }
                             className={cn(
                               "px-3 py-1.5 rounded-lg text-sm border transition-all capitalize flex-1",
                               seasons.includes(s)
                                 ? "bg-accent/10 border-accent/50 text-accent"
-                                : "border-border text-foreground-muted hover:border-border/80"
+                                : "border-border text-foreground-muted hover:border-border/80",
                             )}
                           >
                             {s.slice(0, 2).toUpperCase()}
-                            <span className="hidden sm:inline">{s.slice(2)}</span>
+                            <span className="hidden sm:inline">
+                              {s.slice(2)}
+                            </span>
                           </button>
                         ))}
                       </div>
@@ -481,7 +586,11 @@ export function UploadModal({ open, onClose, onSaved }: UploadModalProps) {
                     <Button
                       variant="outline"
                       className="flex-1"
-                      onClick={() => { reset(); onClose(); onSaved(); }}
+                      onClick={() => {
+                        reset();
+                        onClose();
+                        onSaved();
+                      }}
                     >
                       Skip details
                     </Button>
@@ -496,7 +605,9 @@ export function UploadModal({ open, onClose, onSaved }: UploadModalProps) {
               {step === "saving" && (
                 <div className="p-8 flex flex-col items-center gap-4 py-16">
                   <div className="w-12 h-12 rounded-full border-2 border-accent/30 border-t-accent animate-spin" />
-                  <p className="text-foreground-muted">Saving to your wardrobe…</p>
+                  <p className="text-foreground-muted">
+                    Saving to your wardrobe…
+                  </p>
                 </div>
               )}
 
@@ -512,8 +623,12 @@ export function UploadModal({ open, onClose, onSaved }: UploadModalProps) {
                     <Check className="h-7 w-7 text-accent" />
                   </motion.div>
                   <div className="text-center">
-                    <p className="text-foreground font-semibold text-lg">Added to wardrobe!</p>
-                    <p className="text-sm text-foreground-muted mt-1">Your item has been saved.</p>
+                    <p className="text-foreground font-semibold text-lg">
+                      Added to wardrobe!
+                    </p>
+                    <p className="text-sm text-foreground-muted mt-1">
+                      Your item has been saved.
+                    </p>
                   </div>
                 </div>
               )}

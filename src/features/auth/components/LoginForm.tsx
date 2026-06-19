@@ -12,12 +12,15 @@ import { loginSchema, type LoginInput } from "@/schemas/auth";
 type FieldErrors = Partial<Record<keyof LoginInput, string>>;
 
 export function LoginForm() {
-  const searchParams = useSearchParams();
-  const callbackUrl  = searchParams.get("callbackUrl") ?? "/dashboard";
+  const callbackUrl =
+    typeof window !== "undefined"
+      ? (new URLSearchParams(window.location.search).get("callbackUrl") ??
+        "/dashboard")
+      : "/dashboard";
 
-  const [values,   setValues]   = useState<LoginInput>({ email: "", password: "" });
-  const [errors,   setErrors]   = useState<FieldErrors>({});
-  const [loading,  setLoading]  = useState(false);
+  const [values, setValues] = useState<LoginInput>({ email: "", password: "" });
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [authError, setAuthError] = useState("");
 
@@ -37,7 +40,7 @@ export function LoginForm() {
     const parsed = loginSchema.safeParse(values);
     if (!parsed.success) {
       const fieldErrors: FieldErrors = {};
-      parsed.error.errors.forEach((err) => {
+      parsed.error.issues.forEach((err) => {
         const key = err.path[0] as keyof LoginInput;
         if (!fieldErrors[key]) fieldErrors[key] = err.message;
       });
@@ -53,7 +56,7 @@ export function LoginForm() {
       // (status 0) in the browser, which made every login look like a
       // failure even when the credentials were correct.
       const result = await signIn("credentials", {
-        email:    parsed.data.email,
+        email: parsed.data.email,
         password: parsed.data.password,
         redirect: false,
       });
@@ -76,8 +79,12 @@ export function LoginForm() {
   return (
     <div className="animate-fade-in">
       <div className="mb-8">
-        <h1 className="font-display text-display-sm text-foreground mb-2">Welcome back</h1>
-        <p className="text-foreground-muted text-sm">Sign in to your Clozest account.</p>
+        <h1 className="font-display text-display-sm text-foreground mb-2">
+          Welcome back
+        </h1>
+        <p className="text-foreground-muted text-sm">
+          Sign in to your Clozest account.
+        </p>
       </div>
 
       {authError && (
@@ -117,7 +124,11 @@ export function LoginForm() {
             className="absolute right-3 top-9 text-foreground-faint hover:text-foreground-muted transition-colors"
             aria-label={showPass ? "Hide password" : "Show password"}
           >
-            {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            {showPass ? (
+              <EyeOff className="h-4 w-4" />
+            ) : (
+              <Eye className="h-4 w-4" />
+            )}
           </button>
         </div>
 

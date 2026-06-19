@@ -1,29 +1,29 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useDropzone }            from "react-dropzone";
+import { useDropzone, type FileRejection } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
-import Image                      from "next/image";
+import Image from "next/image";
 import { Upload, CheckCircle2, Loader2, X, ImageIcon } from "lucide-react";
-import { uploadWardrobeItem }     from "@/actions/wardrobe";
-import { toast }                  from "@/hooks/useToast";
-import { formatBytes }            from "@/utils/formatters";
-import { cn }                     from "@/utils/cn";
+import { uploadWardrobeItem } from "@/actions/wardrobe";
+import { toast } from "@/hooks/useToast";
+import { formatBytes } from "@/utils/formatters";
+import { cn } from "@/utils/cn";
 
 interface FirstUploadProps {
   onUploaded: (itemId: string) => void;
-  onSkip:     () => void;
+  onSkip: () => void;
 }
 
 type UploadStatus = "idle" | "uploading" | "done" | "error";
 
 export function FirstUpload({ onUploaded, onSkip }: FirstUploadProps) {
   const [preview, setPreview] = useState<string | null>(null);
-  const [file,    setFile]    = useState<File | null>(null);
-  const [status,  setStatus]  = useState<UploadStatus>("idle");
-  const [errorMsg, setError]  = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [status, setStatus] = useState<UploadStatus>("idle");
+  const [errorMsg, setError] = useState<string | null>(null);
 
-  const onDrop = useCallback((accepted: File[], rejected: File[]) => {
+  const onDrop = useCallback((accepted: File[], rejected: FileRejection[]) => {
     if (rejected.length > 0) {
       setError("File rejected — must be JPG, PNG, or WebP under 10 MB.");
       return;
@@ -42,8 +42,8 @@ export function FirstUpload({ onUploaded, onSkip }: FirstUploadProps) {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept:   { "image/jpeg": [], "image/png": [], "image/webp": [] },
-    maxSize:  10 * 1024 * 1024,
+    accept: { "image/jpeg": [], "image/png": [], "image/webp": [] },
+    maxSize: 10 * 1024 * 1024,
     maxFiles: 1,
   });
 
@@ -67,12 +67,19 @@ export function FirstUpload({ onUploaded, onSkip }: FirstUploadProps) {
     if (result.error || !result.data) {
       setStatus("error");
       setError(result.error ?? "Upload failed");
-      toast({ variant: "destructive", title: "Upload failed", description: result.error ?? undefined });
+      toast({
+        variant: "destructive",
+        title: "Upload failed",
+        description: result.error ?? undefined,
+      });
       return;
     }
 
     setStatus("done");
-    toast({ title: "First item added ✨", description: "Your AI stylist just got smarter." });
+    toast({
+      title: "First item added ✨",
+      description: "Your AI stylist just got smarter.",
+    });
     setTimeout(() => onUploaded(result.data!.id), 800);
   }
 
@@ -134,44 +141,47 @@ export function FirstUpload({ onUploaded, onSkip }: FirstUploadProps) {
           </motion.div>
         ) : (
           /* ── Dropzone ─────────────────────────────────────────────────── */
-          <motion.div
-            key="dropzone"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+          <div
             {...getRootProps()}
             className={cn(
               "relative border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all duration-300",
               isDragActive
                 ? "border-accent bg-accent/5 scale-[1.01]"
-                : "border-border hover:border-accent/50 hover:bg-surface-2"
+                : "border-border hover:border-accent/50 hover:bg-surface-2",
             )}
           >
-            <input {...getInputProps()} />
             <motion.div
-              animate={isDragActive ? { y: -4 } : { y: 0 }}
-              transition={{ duration: 0.3 }}
+              key="dropzone"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
             >
-              <div className="w-14 h-14 rounded-2xl bg-surface-2 flex items-center justify-center mx-auto mb-5">
-                <ImageIcon className="h-7 w-7 text-foreground-faint" />
-              </div>
-              {isDragActive ? (
-                <p className="text-accent font-medium">Drop it here</p>
-              ) : (
-                <>
-                  <p className="text-foreground font-medium mb-1">
-                    Drop a clothing photo here
-                  </p>
-                  <p className="text-sm text-foreground-muted">
-                    or <span className="text-accent">browse files</span>
-                  </p>
-                  <p className="text-xs text-foreground-faint mt-3">
-                    JPG, PNG, WebP · max 10 MB
-                  </p>
-                </>
-              )}
+              <input {...getInputProps()} />
+              <motion.div
+                animate={isDragActive ? { y: -4 } : { y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="w-14 h-14 rounded-2xl bg-surface-2 flex items-center justify-center mx-auto mb-5">
+                  <ImageIcon className="h-7 w-7 text-foreground-faint" />
+                </div>
+                {isDragActive ? (
+                  <p className="text-accent font-medium">Drop it here</p>
+                ) : (
+                  <>
+                    <p className="text-foreground font-medium mb-1">
+                      Drop a clothing photo here
+                    </p>
+                    <p className="text-sm text-foreground-muted">
+                      or <span className="text-accent">browse files</span>
+                    </p>
+                    <p className="text-xs text-foreground-faint mt-3">
+                      JPG, PNG, WebP · max 10 MB
+                    </p>
+                  </>
+                )}
+              </motion.div>
             </motion.div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
 
