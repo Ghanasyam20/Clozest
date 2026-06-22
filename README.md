@@ -30,13 +30,13 @@ Clozest helps users maximise the value of clothes they already own before recomm
 ## Screenshots
 
 <p align="center">
-  <img src="Screenshots/1.png" width="45%" />
-  <img src="Screenshots/2.png" width="45%" />
+  <img src="Screenshots/1.png" width="70%" />
+  <img src="Screenshots/2.png" width="70%" />
 </p>
 
 <p align="center">
-  <img src="Screenshots/3.png" width="45%" />
-  <img src="Screenshots/4.png" width="45%" />
+  <img src="Screenshots/3.png" width="70%" />
+  <img src="Screenshots/4.png" width="70%" />
 </p>
 
 <p align="center">
