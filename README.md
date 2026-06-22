@@ -12,20 +12,34 @@ Clozest helps users maximise the value of clothes they already own before recomm
 
 ## Stack
 
-| Layer       | Technology                                    | Cost  |
-|-------------|-----------------------------------------------|-------|
-| Frontend    | Next.js 15, React 19, TypeScript, Tailwind    | Free  |
-| Auth        | Auth.js v5 (Credentials + JWT)                | Free  |
-| Database    | Supabase PostgreSQL + Prisma ORM              | Free  |
-| Storage     | Supabase Storage                              | Free  |
-| AI Service  | FastAPI + CLIP (HuggingFace) on Render        | Free  |
-| Weather     | Open-Meteo API                                | Free  |
-| Deployment  | Vercel (web) + Render (AI)                    | Free  |
-| Monitoring  | Sentry (error tracking, 5K events/mo free)    | Free  |
-
-**Total monthly cost: $0.00**
+| Layer      | Technology                                 |
+| ---------- | ------------------------------------------ |
+| Frontend   | Next.js 15, React 19, TypeScript, Tailwind |
+| Auth       | Auth.js v5 (Credentials + JWT)             |
+| Database   | Supabase PostgreSQL + Prisma ORM           |
+| Storage    | Supabase Storage                           |
+| AI Service | FastAPI + CLIP (HuggingFace) on Render     |
+| Weather    | Open-Meteo API                             |
+| Deployment | Vercel (web) + Render (AI)                 |
+| Monitoring | Sentry (error tracking, 5K events/mo free) |
 
 ---
+
+## Screenshots
+
+<p align="center">
+  <img src="Screenshots/1.png" width="45%" />
+  <img src="Screenshots/2.png" width="45%" />
+</p>
+
+<p align="center">
+  <img src="Screenshots/3.png" width="45%" />
+  <img src="Screenshots/4.png" width="45%" />
+</p>
+
+<p align="center">
+  <img src="Screenshots/5.png" width="70%" />
+</p>
 
 ## Quick Start
 
@@ -33,9 +47,9 @@ Clozest helps users maximise the value of clothes they already own before recomm
 
 - Node.js 20+
 - Python 3.11+
-- [Supabase](https://supabase.com) account (free)
-- [Render](https://render.com) account (free)
-- [Vercel](https://vercel.com) account (free)
+- [Supabase](https://supabase.com) account
+- [Render](https://render.com) account
+- [Vercel](https://vercel.com) account
 
 ### 1. Clone and install
 
@@ -66,6 +80,7 @@ npx prisma studio
 ### 4. Supabase Storage
 
 Run `supabase-setup.sql` in the Supabase SQL Editor:
+
 - Creates `wardrobe-items`, `avatars`, `outfit-assets` buckets
 - Sets RLS policies so users can only access their own files
 
@@ -122,21 +137,21 @@ First deploy downloads CLIP models (~300MB) — allow 5–10 minutes.
 
 ## Environment Variables
 
-| Variable | Description |
-|---|---|
-| `DATABASE_URL` | Supabase PostgreSQL URI with `?pgbouncer=true` |
-| `DIRECT_URL` | Direct PostgreSQL URI (for migrations) |
-| `AUTH_SECRET` | Random 32-byte secret (`openssl rand -base64 32`) |
-| `NEXTAUTH_URL` | Your deployment URL |
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (server-only) |
-| `AI_SERVICE_URL` | Render FastAPI URL |
-| `AI_SERVICE_SECRET` | Shared secret between Next.js and FastAPI |
-| `NEXT_PUBLIC_AI_CLASSIFICATION_ENABLED` | `"true"` to enable AI, `"false"` for mock mode |
-| `NEXT_PUBLIC_SENTRY_DSN` | Sentry DSN |
-| `SENTRY_AUTH_TOKEN` | Sentry auth token for source map upload |
-| `CRON_SECRET` | Secret for Vercel Cron job auth |
+| Variable                                | Description                                       |
+| --------------------------------------- | ------------------------------------------------- |
+| `DATABASE_URL`                          | Supabase PostgreSQL URI with `?pgbouncer=true`    |
+| `DIRECT_URL`                            | Direct PostgreSQL URI (for migrations)            |
+| `AUTH_SECRET`                           | Random 32-byte secret (`openssl rand -base64 32`) |
+| `NEXTAUTH_URL`                          | Your deployment URL                               |
+| `NEXT_PUBLIC_SUPABASE_URL`              | Supabase project URL                              |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`         | Supabase anon key                                 |
+| `SUPABASE_SERVICE_ROLE_KEY`             | Supabase service role key (server-only)           |
+| `AI_SERVICE_URL`                        | Render FastAPI URL                                |
+| `AI_SERVICE_SECRET`                     | Shared secret between Next.js and FastAPI         |
+| `NEXT_PUBLIC_AI_CLASSIFICATION_ENABLED` | `"true"` to enable AI, `"false"` for mock mode    |
+| `NEXT_PUBLIC_SENTRY_DSN`                | Sentry DSN                                        |
+| `SENTRY_AUTH_TOKEN`                     | Sentry auth token for source map upload           |
+| `CRON_SECRET`                           | Secret for Vercel Cron job auth                   |
 
 ---
 
@@ -211,8 +226,8 @@ clozest/
 
 ## Implementation Phases
 
-| Phase | Feature                         | Status     |
-|-------|---------------------------------|------------|
+| Phase | Feature                         | Status      |
+| ----- | ------------------------------- | ----------- |
 | 1     | Foundation, Auth, Design System | ✅ Complete |
 | 2     | Digital Closet, Upload Flow     | ✅ Complete |
 | 3     | Style DNA, Onboarding           | ✅ Complete |
@@ -225,38 +240,38 @@ clozest/
 
 ## Design System
 
-| Token          | Value           | Usage                  |
-|----------------|-----------------|------------------------|
-| Background     | `#0F0F10`       | Page background        |
-| Surface        | `#17181B`       | Card/panel background  |
-| Accent (Gold)  | `#C8A46B`       | CTAs, highlights       |
-| Foreground     | `#FFFFFF`       | Primary text           |
-| Muted          | `#A7A7A7`       | Secondary text         |
-| Primary font   | Geist Sans      | UI text                |
-| Display font   | Cormorant Garamond | Headlines, logo     |
+| Token         | Value              | Usage                 |
+| ------------- | ------------------ | --------------------- |
+| Background    | `#0F0F10`          | Page background       |
+| Surface       | `#17181B`          | Card/panel background |
+| Accent (Gold) | `#C8A46B`          | CTAs, highlights      |
+| Foreground    | `#FFFFFF`          | Primary text          |
+| Muted         | `#A7A7A7`          | Secondary text        |
+| Primary font  | Geist Sans         | UI text               |
+| Display font  | Cormorant Garamond | Headlines, logo       |
 
 ---
 
 ## API Reference
 
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| POST | `/api/auth/register` | ❌ | Create account |
-| GET/PATCH | `/api/profile` | ✅ | User profile |
-| POST | `/api/profile/style` | ✅ | Upsert style DNA |
-| POST | `/api/profile/complete-onboarding` | ✅ | Mark onboarding done |
-| GET/POST | `/api/wardrobe` | ✅ | List / create wardrobe items |
-| GET/PATCH/DELETE | `/api/wardrobe/[id]` | ✅ | Item detail |
-| POST | `/api/wardrobe/upload` | ✅ | Upload image to Supabase |
-| GET/POST | `/api/outfits` | ✅ | List / save outfits |
-| GET/DELETE | `/api/outfits/[id]` | ✅ | Outfit detail |
-| POST | `/api/outfits/[id]/wear` | ✅ | Mark outfit as worn |
-| GET | `/api/analytics` | ✅ | Full analytics payload |
-| POST | `/api/ai/classify` | ✅ | AI clothing classification |
-| POST | `/api/ai/generate-outfit` | ✅ | AI outfit generation |
-| POST | `/api/ai/bulk-classify` | ✅ | Batch classification |
-| GET | `/api/ai/warmup` | ❌ | Ping AI service |
-| GET | `/api/cron/health-snapshot` | 🔑 | Daily health score snapshot |
+| Method           | Endpoint                           | Auth | Description                  |
+| ---------------- | ---------------------------------- | ---- | ---------------------------- |
+| POST             | `/api/auth/register`               | ❌   | Create account               |
+| GET/PATCH        | `/api/profile`                     | ✅   | User profile                 |
+| POST             | `/api/profile/style`               | ✅   | Upsert style DNA             |
+| POST             | `/api/profile/complete-onboarding` | ✅   | Mark onboarding done         |
+| GET/POST         | `/api/wardrobe`                    | ✅   | List / create wardrobe items |
+| GET/PATCH/DELETE | `/api/wardrobe/[id]`               | ✅   | Item detail                  |
+| POST             | `/api/wardrobe/upload`             | ✅   | Upload image to Supabase     |
+| GET/POST         | `/api/outfits`                     | ✅   | List / save outfits          |
+| GET/DELETE       | `/api/outfits/[id]`                | ✅   | Outfit detail                |
+| POST             | `/api/outfits/[id]/wear`           | ✅   | Mark outfit as worn          |
+| GET              | `/api/analytics`                   | ✅   | Full analytics payload       |
+| POST             | `/api/ai/classify`                 | ✅   | AI clothing classification   |
+| POST             | `/api/ai/generate-outfit`          | ✅   | AI outfit generation         |
+| POST             | `/api/ai/bulk-classify`            | ✅   | Batch classification         |
+| GET              | `/api/ai/warmup`                   | ❌   | Ping AI service              |
+| GET              | `/api/cron/health-snapshot`        | 🔑   | Daily health score snapshot  |
 
 ---
 
