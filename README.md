@@ -6,6 +6,8 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue)](https://www.typescriptlang.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+🌐 Live Demo: https://clozest.vercel.app
+
 Clozest helps users maximise the value of clothes they already own before recommending purchases. It transforms a user's wardrobe into a smart, AI-driven styling ecosystem — **no paid APIs, completely free to deploy.**
 
 ---
