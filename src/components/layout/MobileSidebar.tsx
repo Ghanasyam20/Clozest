@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -31,6 +31,17 @@ export function MobileSidebar() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
   return (
     <>
       {/* Hamburger trigger */}
@@ -45,30 +56,43 @@ export function MobileSidebar() {
       <AnimatePresence>
         {open && (
           <>
-            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm lg:hidden"
+              className="fixed inset-0 z-[9998] lg:hidden"
+              style={{ backgroundColor: "rgba(15, 15, 16, 0.97)", backdropFilter: "blur(8px)" }}
               onClick={() => setOpen(false)}
               aria-hidden="true"
             />
 
-            {/* Drawer */}
+            {/* Drawer — explicit height:100vh via inline style rather than
+                relying on `inset-y-0` + flex to resolve it, since flex-1
+                children (the <nav>) need a definite height on the parent
+                to distribute into. This removes any ambiguity that was
+                collapsing the nav to 0px. */}
             <motion.aside
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed inset-y-0 left-0 z-50 w-[260px] bg-surface border-r border-border flex flex-col py-6 px-4 lg:hidden"
+              className="fixed left-0 top-0 z-[9999] w-[260px] max-w-[80vw] bg-surface border-r border-border lg:hidden"
+              style={{
+                height: "100vh",
+                display: "flex",
+                flexDirection: "column",
+                paddingTop: "1.5rem",
+                paddingBottom: "1.5rem",
+                paddingLeft: "1rem",
+                paddingRight: "1rem",
+              }}
               role="dialog"
               aria-modal="true"
               aria-label="Navigation menu"
             >
               {/* Header */}
-              <div className="flex items-center justify-between mb-10 px-3">
+              <div className="flex items-center justify-between mb-10 px-3 flex-shrink-0">
                 <Link href="/dashboard" onClick={() => setOpen(false)}>
                   <span className="font-display text-xl text-gradient-gold tracking-widest uppercase">
                     Clozest
@@ -83,8 +107,14 @@ export function MobileSidebar() {
                 </button>
               </div>
 
-              {/* Nav items */}
-              <nav className="flex-1 space-y-1">
+              {/* Nav items — explicit flex:1 1 auto + minHeight:0 via
+                  inline style, the most defensive way to force a flex
+                  child to actually claim remaining space regardless of
+                  any competing class or ambiguous parent height. */}
+              <nav
+                style={{ flex: "1 1 auto", minHeight: 0, overflowY: "auto" }}
+                className="space-y-1"
+              >
                 {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
                   const active =
                     pathname === href || pathname.startsWith(href + "/");
@@ -116,7 +146,7 @@ export function MobileSidebar() {
                   await signOut({ redirect: false });
                   window.location.href = "/";
                 }}
-                className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm text-foreground-faint hover:text-destructive hover:bg-surface-2 transition-all duration-200"
+                className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm text-foreground-faint hover:text-destructive hover:bg-surface-2 transition-all duration-200 flex-shrink-0"
               >
                 <LogOut className="h-4 w-4" />
                 Sign out

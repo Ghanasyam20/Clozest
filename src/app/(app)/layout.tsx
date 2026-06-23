@@ -16,7 +16,10 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         <TopBar user={session.user} />
         <main
           id="main-content"
-          className="flex-1 overflow-y-auto p-6 lg:p-8"
+          // Padding now steps down for small phones (16px), scales up
+          // through tablet (24px) and desktop (32px), instead of jumping
+          // straight from 24px to 32px with nothing smaller for phones.
+          className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8"
           tabIndex={-1}
         >
           {children}

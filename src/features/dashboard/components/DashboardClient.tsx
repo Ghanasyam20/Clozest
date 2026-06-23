@@ -59,20 +59,23 @@ export function DashboardClient({
         variants={container}
         initial="hidden"
         animate="show"
-        className="space-y-6 max-w-[1400px]"
+        className="space-y-4 sm:space-y-6 max-w-[1400px]"
       >
         <motion.div variants={itemVariant}>
-          <h1 className="font-display text-display-md text-foreground leading-none">
+          {/* text-display-md was sized for desktop; it now steps down
+              on phones so the greeting doesn't wrap awkwardly or crowd
+              the edges of a 375px viewport. */}
+          <h1 className="font-display text-2xl sm:text-display-md text-foreground leading-tight sm:leading-none">
             {getGreeting()}, {firstName}.
           </h1>
-          <p className="text-foreground-muted mt-2 text-sm">
+          <p className="text-foreground-muted mt-1.5 sm:mt-2 text-sm">
             {totalItems === 0
               ? "Welcome to Clozest — let's start building your digital wardrobe."
               : `You have ${totalItems} piece${totalItems !== 1 ? "s" : ""} in your wardrobe.`}
           </p>
         </motion.div>
 
-        <motion.div variants={itemVariant} className="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
+        <motion.div variants={itemVariant} className="grid md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
           <div className="xl:col-span-2">
             <HealthScoreWidget
               score={healthScore}
@@ -85,7 +88,7 @@ export function DashboardClient({
           <WeatherWidget />
         </motion.div>
 
-        <motion.div variants={itemVariant} className="grid md:grid-cols-2 gap-5">
+        <motion.div variants={itemVariant} className="grid md:grid-cols-2 gap-4 sm:gap-5">
           <QuickStats
             totalItems={totalItems}
             totalOutfits={totalOutfits}

@@ -30,6 +30,11 @@ export async function POST(req: NextRequest) {
     return err("Add at least 2 items to your wardrobe before generating outfits.", 400);
   }
 
+  // Lookup map so we can always resolve back to the full local record
+  // (imageUrl, color, wornCount, etc.) regardless of what shape the AI
+  // service returns its item references in.
+  const itemsById = new Map(wardrobeItems.map((i) => [i.id, i]));
+
   // Fetch recent outfit hashes to avoid repetition (last 5)
   const recentOutfits = await prisma.outfit.findMany({
     where:   { userId, itemsHash: { not: null } },
@@ -66,12 +71,31 @@ export async function POST(req: NextRequest) {
 
         if (res.ok) {
           const aiResult = await res.json();
-          result = {
-            items:           aiResult.items ?? [],
-            confidenceScore: aiResult.confidence_score ?? aiResult.confidenceScore ?? 0,
-            reasoning:       aiResult.reasoning ?? "",
-          };
-          break;
+
+          // The AI service may only return lightweight item references
+          // (e.g. just an id, or a partial/reshaped object) rather than
+          // full WardrobeItem records. Re-resolve every returned item
+          // against our own freshly-fetched wardrobeItems so fields like
+          // imageUrl, color, and wornCount are always the real, complete
+          // values — never whatever (possibly incomplete) shape the AI
+          // service happened to send back.
+          const rawItems: Array<{ id?: string }> = aiResult.items ?? [];
+          const resolvedItems = rawItems
+            .map((raw) => (raw?.id ? itemsById.get(raw.id) : undefined))
+            .filter((item): item is WardrobeItem => Boolean(item));
+
+          // If resolution dropped items (e.g. AI returned an id that no
+          // longer exists, or no ids at all), don't silently ship a
+          // broken/empty outfit — fall through to the rule-based
+          // generator instead, which always works against real data.
+          if (resolvedItems.length >= 2) {
+            result = {
+              items:           resolvedItems,
+              confidenceScore: aiResult.confidence_score ?? aiResult.confidenceScore ?? 0,
+              reasoning:       aiResult.reasoning ?? "",
+            };
+            break;
+          }
         }
 
         if (attempt < 2) await new Promise((r) => setTimeout(r, 3000));
