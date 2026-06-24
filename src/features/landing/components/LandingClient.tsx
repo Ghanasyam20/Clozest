@@ -78,7 +78,13 @@ export default function LandingClient() {
 
   return (
     <>
-      {/* ── Navbar ── */}
+      {/* ── Navbar ──
+          Height/padding reduced and font sizes made fluid (clamp) so the
+          bar doesn't crowd or wrap on narrow phones. "Sign In" hides below
+          ~380px width via a Tailwind responsive class (not a JS width
+          check, which would break SSR and not update on resize) — at that
+          width "Get Started" alone is enough of a CTA, and Sign In stays
+          reachable from the register page. */}
       <motion.nav
         initial={{ y: -80, opacity: 0 }}
         animate={navVisible ? { y: 0, opacity: 1 } : { y: -80, opacity: 0 }}
@@ -92,8 +98,8 @@ export default function LandingClient() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "0 2.5rem",
-          height: "64px",
+          padding: "0 1.25rem",
+          height: "56px",
           background: "rgba(15,15,16,0.85)",
           backdropFilter: "blur(16px)",
           borderBottom: "1px solid rgba(200,164,107,0.12)",
@@ -102,21 +108,24 @@ export default function LandingClient() {
         <span
           style={{
             fontFamily: "Georgia, serif",
-            fontSize: "1.3rem",
+            fontSize: "clamp(1rem, 4vw, 1.3rem)",
             color: "#C8A46B",
-            letterSpacing: "0.15em",
+            letterSpacing: "0.1em",
             fontWeight: 400,
+            whiteSpace: "nowrap",
           }}
         >
           CLOZEST
         </span>
-        <div style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
+        <div style={{ display: "flex", gap: "0.6rem", alignItems: "center" }}>
           <Link
             href="/login"
+            className="hidden min-[380px]:inline-block"
             style={{
               color: "rgba(255,255,255,0.7)",
               textDecoration: "none",
-              fontSize: "0.9rem",
+              fontSize: "0.8rem",
+              whiteSpace: "nowrap",
             }}
           >
             Sign In
@@ -126,12 +135,13 @@ export default function LandingClient() {
             style={{
               background: "#C8A46B",
               color: "#0F0F10",
-              padding: "0.5rem 1.2rem",
+              padding: "0.45rem 0.9rem",
               borderRadius: "4px",
               textDecoration: "none",
-              fontSize: "0.85rem",
+              fontSize: "0.75rem",
               fontWeight: 600,
-              letterSpacing: "0.04em",
+              letterSpacing: "0.02em",
+              whiteSpace: "nowrap",
             }}
           >
             Get Started
